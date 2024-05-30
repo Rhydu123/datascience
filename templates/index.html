@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Heart Disease Prediction</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Heart Disease Prediction</h1>
+        <h2>Evaluate Model</h2>
+        <form id="upload-form" method="post" enctype="multipart/form-data" action="/evaluate">
+            <label for="file-upload" class="file-label">Upload Dataset (CSV)</label>
+            <input type="file" id="file-upload" name="file" accept=".csv" required>
+            <label for="model-select">Choose Model:</label>
+            <select id="model-select" name="model" required>
+                <option value="knn">K-Nearest Neighbors</option>
+                <option value="decision-tree">Decision Tree</option>
+                <option value="random-forest">Random Forest</option>
+            </select>
+            <button type="submit">Evaluate</button>
+        </form>
+
+        <div id="evaluation-results">
+            <h2>Evaluation Results</h2>
+            <div id="accuracy"></div>
+        </div>
+
+        <h2>Predict New Data Point</h2>
+        <form id="predict-form">
+            <label for="input-age">Age:</label>
+            <input type="number" id="input-age" name="age" required>
+            <label for="input-sex">Sex (1 = male, 0 = female):</label>
+            <input type="number" id="input-sex" name="sex" required>
+            <label for="input-cp">Chest Pain Type:</label>
+            <input type="number" id="input-cp" name="cp" required>
+            <label for="input-trestbps">Resting Blood Pressure:</label>
+            <input type="number" id="input-trestbps" name="trestbps" required>
+            <label for="input-chol">Serum Cholestoral:</label>
+            <input type="number" id="input-chol" name="chol" required>
+            <label for="input-fbs">Fasting Blood Sugar:</label>
+            <input type="number" id="input-fbs" name="fbs" required>
+            <label for="input-restecg">Resting Electrocardiographic Results:</label>
+            <input type="number" id="input-restecg" name="restecg" required>
+            <label for="input-thalach">Maximum Heart Rate Achieved:</label>
+            <input type="number" id="input-thalach" name="thalach" required>
+            <label for="input-exang">Exercise Induced Angina:</label>
+            <input type="number" id="input-exang" name="exang" required>
+            <label for="input-oldpeak">Oldpeak:</label>
+            <input type="number" id="input-oldpeak" name="oldpeak" required>
+            <label for="input-slope">Slope:</label>
+            <input type="number" id="input-slope" name="slope" required>
+            <label for="input-ca">Number of Major Vessels:</label>
+            <input type="number" id="input-ca" name="ca" required>
+            <label for="input-thal">Thal:</label>
+            <input type="number" id="input-thal" name="thal" required>
+            <label for="model-select-predict">Choose Model:</label>
+            <select id="model-select-predict" name="model" required>
+                <option value="knn">K-Nearest Neighbors</option>
+                <option value="decision-tree">Decision Tree</option>
+                <option value="random-forest">Random Forest</option>
+            </select>
+            <button type="button" onclick="makePrediction()">Predict</button>
+        </form>
+        <div id="prediction-results">
+            <h2>Prediction Results</h2>
+            <div id="prediction"></div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('upload-form').onsubmit = async (event) => {
+            event.preventDefault();
+            const formData = new FormData(event.target);
+            const response = await fetch('/evaluate', {
+                method: 'POST',
+                body: formData
+            });
+            const result = await response.json();
+            document.getElementById('accuracy').innerText = `Accuracy: ${result.accuracy}`;
+        };
+
+        async function makePrediction() {
+            const form = document.getElementById('predict-form');
+            const formData = new FormData(form);
+            const data = {
+                model: formData.get('model'),
+                input: {
+                    age: parseFloat(formData.get('age')),
+                    sex: parseFloat(formData.get('sex')),
+                    cp: parseFloat(formData.get('cp')),
+                    trestbps: parseFloat(formData.get('trestbps')),
+                    chol: parseFloat(formData.get('chol')),
+                    fbs: parseFloat(formData.get('fbs')),
+                    restecg: parseFloat(formData.get('restecg')),
+                    thalach: parseFloat(formData.get('thalach')),
+                    exang: parseFloat(formData.get('exang')),
+                    oldpeak: parseFloat(formData.get('oldpeak')),
+                    slope: parseFloat(formData.get('slope')),
+                    ca: parseFloat(formData.get('ca')),
+                    thal: parseFloat(formData.get('thal'))
+                }
+            };
+            const response = await fetch('/predict', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            });
+            const result = await response.json();
+            document.getElementById('prediction').innerText = `Prediction: ${result.prediction}`;
+        }
+    </script>
+</body>
+</html>
